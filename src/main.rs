@@ -1,24 +1,54 @@
 use std::fs;
+use encoding_rs;
+use std::env;
 mod decipher;
+mod downloader;
 
 
 fn main() {
-    
-    // Open file as bytes vector.
-    let mut bytestream: Vec<u8> = fs::read("./data.tst")
-    .expect("Should have been able to read the file");
-    
-    // Decrypt vector
-    decipher::decrypt(&mut bytestream, "artykulacja");
+    let args: Vec<String> = env::args().collect();
+    let mut bytestream: Vec<u8>;
 
-    // Save bytestream as string
-    let mut decryptedoutput: String = String::from("");
-
-    for byte in bytestream.iter() {
-        decryptedoutput.push(*byte as char);
+    if args.len() < 4 {
+        eprintln!("Usage: papajak-extended [<filename_to_read:string> or <filename_to_save_download:string>] <testpassword:string> <answers_file_name:string> (optional) <testname_to_download:string>");
+        return;
     }
 
-    fs::write("./output.txt", decryptedoutput)
-    .expect("Should have been able to write the file");
+    let password: &String = &args[2];
+    let answers_file_name: &String = &args[3];
+
+    if args.len() == 4 {
+        // Local mode
+        let file_name_to_read: &String = &args[1];
+        
+        bytestream = fs::read(&file_name_to_read)
+        .expect("Should have been able to read the file");
+
+    } else if args.len() == 5 {
+        let filename_to_save_download: &String = &args[1];
+        let testname_to_download: &String = &args[4];
+
+        downloader::downloadtest(&testname_to_download, &filename_to_save_download);
+        bytestream = fs::read(&filename_to_save_download)
+        .expect("Should have been able to read the file");
+        
+    } else {
+        eprintln!("Usage: papajak-extended [<filename_to_read:string> or <filename_to_save_download:string>] <testpassword:string> <answers_file_name:string> (optional) <testname_to_download:string>");
+        return;
+    }
+
+    // Decrypt vector
+    decipher::decrypt(&mut bytestream, &password);
+
+    // Decode vector
+    let (cow, encoding_used, had_errors) = encoding_rs::WINDOWS_1250.decode(&bytestream);
+    assert_eq!(encoding_used, encoding_rs::WINDOWS_1250);
+    assert!(!had_errors);
     
+    // Create string
+    let decoded_string = String::from(cow);
+
+    // Save string
+    fs::write(answers_file_name, decoded_string)
+    .expect("Should have been able to write the file");
 }
