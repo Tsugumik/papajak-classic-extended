@@ -42,8 +42,8 @@ fn main() {
 
     // Decode vector
     let (cow, encoding_used, had_errors) = encoding_rs::WINDOWS_1250.decode(&bytestream);
-    assert_eq!(encoding_used, encoding_rs::WINDOWS_1250);
-    assert!(!had_errors);
+    assert_eq!(encoding_used, encoding_rs::WINDOWS_1250, "The encoding used does not match the preferred one");
+    assert!(!had_errors, "Decoding errors found");
     
     // Create string
     let decoded_string = String::from(cow);
