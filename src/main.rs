@@ -46,7 +46,7 @@ fn main() {
     assert!(!had_errors, "Decoding errors found");
     
     // Create string
-    let decoded_string = String::from(cow);
+    let decoded_string: String = String::from(cow);
 
     // Save string
     fs::write(answers_file_name, decoded_string)
