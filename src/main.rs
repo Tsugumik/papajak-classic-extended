@@ -48,6 +48,9 @@ fn main() {
     // Create string
     let decoded_string: String = cow.to_string();
 
+    // Check if the string contains a password - this is a condition for correct decryption
+    assert!(decoded_string.contains(password), "Password not found in decoded string, which means you propably entered the wrong password");
+
     // Save string
     fs::write(answers_file_name, decoded_string)
     .expect("Should have been able to write the file");
